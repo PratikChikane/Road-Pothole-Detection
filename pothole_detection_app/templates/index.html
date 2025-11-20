@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pothole Detection System</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-road me-2"></i>
+                PotholeDetect Pro
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#"><i class="fas fa-home me-1"></i> Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#"><i class="fas fa-chart-bar me-1"></i> Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#"><i class="fas fa-history me-1"></i> History</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#"><i class="fas fa-info-circle me-1"></i> About</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="app-header mb-4">
+                    <h1 class="header-title">Pothole Detection System</h1>
+                    <p class="text-muted">Upload an image to detect potholes using YOLOv8 technology</p>
+                </div>
+
+                {% if error %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                {% endif %}
+
+                <div class="app-card card mb-4">
+                    <div class="card-body p-4">
+                        <form action="{{ url_for('detect') }}" method="post" enctype="multipart/form-data" id="detectionForm">
+                            <div class="row">
+                                <div class="col-md-6 mx-auto">
+                                    <div class="upload-zone" id="dropZone">
+                                        <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                                        <h5>Drag & Drop Image</h5>
+                                        <p class="text-muted mb-2">or</p>
+                                        <input type="file" class="d-none" id="file" name="file" required accept=".jpg,.jpeg,.png">
+                                        <button type="button" class="btn btn-outline-primary" id="browseBtn">Browse Files</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="preview-container" id="imagePreview">
+                                <img src="#" class="preview-image" id="previewImage" alt="Preview">
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="confidence" class="form-label d-flex justify-content-between">
+                                    <span>Confidence Threshold</span>
+                                    <span class="confidence-value" id="confidenceValue">0.25</span>
+                                </label>
+                                <input type="range" class="form-range confidence-slider" id="confidence" name="confidence" min="0.1" max="0.9" step="0.05" value="0.25" oninput="updateConfidenceValue(this.value)">
+                            </div>
+
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-detect">
+                                    <i class="fas fa-search me-2"></i>Detect Potholes
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <!-- Technology Explainer -->
+                <div class="info-card technology-card">
+                    <h3><i class="fas fa-microchip me-2"></i>Our Technology</h3>
+                    <div class="info-content">
+                        <div class="tech-icon">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <p>This application uses <strong>YOLOv8</strong>, a state-of-the-art, real-time object detection system. The neural network divides images into regions and predicts bounding boxes and probabilities for each region.</p>
+                        <div class="tech-features">
+                            <div class="tech-feature">
+                                <i class="fas fa-tachometer-alt"></i>
+                                <span>Real-time detection</span>
+                            </div>
+                            <div class="tech-feature">
+                                <i class="fas fa-bullseye"></i>
+                                <span>High accuracy</span>
+                            </div>
+                            <div class="tech-feature">
+                                <i class="fas fa-expand-arrows-alt"></i>
+                                <span>Multiple object tracking</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- How It Works -->
+                <div class="info-card process-card">
+                    <h3><i class="fas fa-cogs me-2"></i>How It Works</h3>
+                    <div class="process-steps">
+                        <div class="process-step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h5>Upload Image</h5>
+                                <p>Select or drag an image of a road surface with potential potholes.</p>
+                            </div>
+                        </div>
+                        <div class="process-step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h5>AI Processing</h5>
+                                <p>Our YOLOv8 model analyzes the image to identify potholes with high precision.</p>
+                            </div>
+                        </div>
+                        <div class="process-step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h5>View Results</h5>
+                                <p>Get detailed results with visual indicators of pothole locations and confidence scores.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQ Accordion -->
+                <div class="info-card faq-card">
+                    <h3><i class="fas fa-question-circle me-2"></i>FAQ</h3>
+                    <div class="accordion" id="faqAccordion">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingOne">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                                    What image formats are supported?
+                                </button>
+                            </h2>
+                            <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Our system currently supports JPG, JPEG, and PNG image formats. For best results, use clear, well-lit images of road surfaces.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingTwo">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                    What is the confidence threshold?
+                                </button>
+                            </h2>
+                            <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    The confidence threshold determines how certain the model must be before identifying something as a pothole. Higher values mean stricter detection with fewer false positives but might miss some potholes.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingThree">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                    Can I use images from any angle?
+                                </button>
+                            </h2>
+                            <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Yes, the model is trained on diverse angles. However, overhead or slightly angled views typically provide the best detection results. Extreme angles may reduce accuracy.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5><i class="fas fa-road me-2"></i>PotholeDetect Pro</h5>
+                    <p>Advanced pothole detection using YOLOv8 technology to improve road safety and maintenance.</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>Quick Links</h5>
+                    <ul class="footer-links">
+                        <li><a href="#"><i class="fas fa-angle-right me-1"></i>Home</a></li>
+                        <li><a href="#"><i class="fas fa-angle-right me-1"></i>About</a></li>
+                        <li><a href="#"><i class="fas fa-angle-right me-1"></i>Documentation</a></li>
+                        <li><a href="#"><i class="fas fa-angle-right me-1"></i>Contact</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>Connect With Us</h5>
+                    <div class="social-icons">
+                        <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-github"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2025 PotholeDetect Pro. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>`
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
